@@ -78,7 +78,7 @@ This plan implements the AWS deployment infrastructure for the TaskFlow FullStac
     - Output invoke URL as `api_url`
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 10.1_
 
-- [~] 7. Checkpoint - Verify core infrastructure modules
+- [x] 7. Checkpoint - Verify core infrastructure modules
   - Ensure all Terraform files are syntactically valid using `terraform validate`. Ask the user if questions arise.
 
 - [x] 8. Implement S3 bucket for frontend hosting
@@ -123,11 +123,11 @@ This plan implements the AWS deployment infrastructure for the TaskFlow FullStac
     - Make script executable
     - _Requirements: 8.2, 8.3, 8.5, 8.6_
 
-- [~] 12. Checkpoint - Verify build scripts and Terraform modules
+- [x] 12. Checkpoint - Verify build scripts and Terraform modules
   - Ensure build scripts are executable and produce expected artifacts. Ensure all Terraform files pass `terraform fmt -check` and `terraform validate`. Ask the user if questions arise.
 
-- [-] 13. Create GitHub Actions CI/CD pipeline
-  - [~] 13.1 Create .github/workflows/deploy.yml with test, build, and deploy stages
+- [x] 13. Create GitHub Actions CI/CD pipeline
+  - [x] 13.1 Create .github/workflows/deploy.yml with test, build, and deploy stages
     - Trigger on push to main branch and pull request events targeting main
     - Test stage: run `pytest backend/tests/` and `npm run test` (vitest --run) — fail pipeline if any test fails
     - Build stage: execute scripts/build_backend.sh and scripts/build_frontend.sh (depends on test stage)
@@ -138,7 +138,7 @@ This plan implements the AWS deployment infrastructure for the TaskFlow FullStac
     - Halt pipeline on any terraform apply or deployment step failure
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8, 9.9, 9.10, 9.11, 9.12, 9.13_
 
-- [~] 14. Final checkpoint - Ensure all modules are integrated
+- [x] 14. Final checkpoint - Ensure all modules are integrated
   - Ensure all Terraform files are valid, build scripts produce correct artifacts, and CI/CD pipeline YAML is syntactically correct. Ask the user if questions arise.
 
 ## Notes

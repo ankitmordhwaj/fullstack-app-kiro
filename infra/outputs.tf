@@ -17,3 +17,8 @@ output "lambda_function_name" {
   description = "Lambda function name for code updates"
   value       = aws_lambda_function.backend.function_name
 }
+
+output "cloudfront_distribution_id" {
+  description = "CloudFront distribution ID for cache invalidation"
+  value       = aws_cloudfront_distribution.frontend.id
+}
