@@ -1,0 +1,194 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: TaskFlow Parent Stack - Orchestrates all nested stacks for the TaskFlow application
+
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Deployment environment
+
+  VpcCidr:
+    Type: String
+    Description: CIDR block for the VPC
+
+  DBMinCapacity:
+    Type: Number
+    Default: 0.5
+    Description: Minimum Aurora Capacity Units (ACUs)
+
+  DBMaxCapacity:
+    Type: Number
+    Default: 2
+    Description: Maximum Aurora Capacity Units (ACUs)
+
+  DBMasterUsername:
+    Type: String
+    Description: Master username for the Aurora cluster
+
+  DBMasterPassword:
+    Type: String
+    NoEcho: true
+    Description: Master password for the Aurora cluster
+
+  DBName:
+    Type: String
+    Default: taskflow
+    Description: Name of the default database
+
+  JwtSecretKey:
+    Type: String
+    NoEcho: true
+    MinLength: 32
+    Description: JWT secret key for token signing (minimum 32 characters)
+
+  LambdaMemorySize:
+    Type: Number
+    Default: 512
+    Description: Lambda function memory size in MB
+
+  LambdaTimeout:
+    Type: Number
+    Default: 30
+    Description: Lambda function timeout in seconds
+
+  LambdaS3Bucket:
+    Type: String
+    Description: S3 bucket containing the Lambda deployment package
+
+  LambdaS3Key:
+    Type: String
+    Description: S3 key for the Lambda deployment package
+
+Resources:
+  # ============================================================
+  # Networking Stack
+  # ============================================================
+  NetworkingStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: networking.yaml
+      Parameters:
+        Environment: !Ref Environment
+        VpcCidr: !Ref VpcCidr
+      Tags:
+        - Key: Name
+          Value: !Sub 'taskflow-${Environment}-networking'
+
+  # ============================================================
+  # Database Stack
+  # ============================================================
+  DatabaseStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: NetworkingStack
+    Properties:
+      TemplateURL: database.yaml
+      Parameters:
+        Environment: !Ref Environment
+        VpcId: !GetAtt NetworkingStack.Outputs.VpcId
+        PrivateSubnetIds: !GetAtt NetworkingStack.Outputs.PrivateSubnetIds
+        RdsSecurityGroupId: !GetAtt NetworkingStack.Outputs.RdsSecurityGroupId
+        DBMinCapacity: !Ref DBMinCapacity
+        DBMaxCapacity: !Ref DBMaxCapacity
+        DBMasterUsername: !Ref DBMasterUsername
+        DBMasterPassword: !Ref DBMasterPassword
+        DBName: !Ref DBName
+      Tags:
+        - Key: Name
+          Value: !Sub 'taskflow-${Environment}-database'
+
+  # ============================================================
+  # Secrets Stack
+  # ============================================================
+  SecretsStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: DatabaseStack
+    Properties:
+      TemplateURL: secrets.yaml
+      Parameters:
+        Environment: !Ref Environment
+        ClusterEndpoint: !GetAtt DatabaseStack.Outputs.ClusterEndpoint
+        ClusterPort: !GetAtt DatabaseStack.Outputs.ClusterPort
+        DBName: !GetAtt DatabaseStack.Outputs.DatabaseName
+        DBMasterUsername: !Ref DBMasterUsername
+        DBMasterPassword: !Ref DBMasterPassword
+        JwtSecretKey: !Ref JwtSecretKey
+      Tags:
+        - Key: Name
+          Value: !Sub 'taskflow-${Environment}-secrets'
+
+  # ============================================================
+  # Compute Stack
+  # ============================================================
+  ComputeStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - NetworkingStack
+      - SecretsStack
+    Properties:
+      TemplateURL: compute.yaml
+      Parameters:
+        Environment: !Ref Environment
+        VpcId: !GetAtt NetworkingStack.Outputs.VpcId
+        PrivateSubnetIds: !GetAtt NetworkingStack.Outputs.PrivateSubnetIds
+        LambdaSecurityGroupId: !GetAtt NetworkingStack.Outputs.LambdaSecurityGroupId
+        SecretArn: !GetAtt SecretsStack.Outputs.SecretArn
+        LambdaMemorySize: !Ref LambdaMemorySize
+        LambdaTimeout: !Ref LambdaTimeout
+        LambdaS3Bucket: !Ref LambdaS3Bucket
+        LambdaS3Key: !Ref LambdaS3Key
+      Tags:
+        - Key: Name
+          Value: !Sub 'taskflow-${Environment}-compute'
+
+  # ============================================================
+  # Storage Stack
+  # ============================================================
+  StorageStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: storage.yaml
+      Parameters:
+        Environment: !Ref Environment
+      Tags:
+        - Key: Name
+          Value: !Sub 'taskflow-${Environment}-storage'
+
+Outputs:
+  ApiGatewayInvokeUrl:
+    Description: API Gateway invoke URL
+    Value: !GetAtt ComputeStack.Outputs.ApiInvokeUrl
+    Export:
+      Name: !Sub 'taskflow-${Environment}-ApiGatewayInvokeUrl'
+
+  FrontendBucketName:
+    Description: S3 frontend bucket name
+    Value: !GetAtt StorageStack.Outputs.BucketName
+    Export:
+      Name: !Sub 'taskflow-${Environment}-FrontendBucketName'
+
+  CloudFrontDistributionId:
+    Description: CloudFront distribution ID
+    Value: !GetAtt StorageStack.Outputs.DistributionId
+    Export:
+      Name: !Sub 'taskflow-${Environment}-CloudFrontDistributionId'
+
+  CloudFrontDomainName:
+    Description: CloudFront distribution domain name
+    Value: !GetAtt StorageStack.Outputs.DomainName
+    Export:
+      Name: !Sub 'taskflow-${Environment}-CloudFrontDomainName'
+
+  LambdaFunctionName:
+    Description: Lambda function name
+    Value: !GetAtt ComputeStack.Outputs.FunctionName
+    Export:
+      Name: !Sub 'taskflow-${Environment}-LambdaFunctionName'
+
+  AuroraClusterEndpoint:
+    Description: Aurora cluster endpoint
+    Value: !GetAtt DatabaseStack.Outputs.ClusterEndpoint
+    Export:
+      Name: !Sub 'taskflow-${Environment}-AuroraClusterEndpoint'

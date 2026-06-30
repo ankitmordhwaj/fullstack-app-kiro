@@ -1,0 +1,10 @@
+[
+  { "ParameterKey": "Environment", "ParameterValue": "staging" },
+  { "ParameterKey": "VpcCidr", "ParameterValue": "10.1.0.0/16" },
+  { "ParameterKey": "DBMinCapacity", "ParameterValue": "0.5" },
+  { "ParameterKey": "DBMaxCapacity", "ParameterValue": "4" },
+  { "ParameterKey": "DBMasterUsername", "ParameterValue": "taskflow_admin" },
+  { "ParameterKey": "DBName", "ParameterValue": "taskflow" },
+  { "ParameterKey": "LambdaMemorySize", "ParameterValue": "512" },
+  { "ParameterKey": "LambdaTimeout", "ParameterValue": "30" }
+]
