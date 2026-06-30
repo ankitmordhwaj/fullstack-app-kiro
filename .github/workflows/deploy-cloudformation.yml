@@ -1,4 +1,4 @@
-name: TaskFlow CI/CD Pipeline
+name: TaskFlow CloudFormation Deploy
 
 on:
   push:
@@ -118,8 +118,6 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
-      TF_VAR_db_password: ${{ secrets.TF_VAR_DB_PASSWORD }}
-      TF_VAR_jwt_secret_key: ${{ secrets.TF_VAR_JWT_SECRET_KEY }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -136,51 +134,48 @@ jobs:
           name: frontend-dist
           path: frontend/dist/
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_wrapper: false
-
-      - name: Terraform Init
-        working-directory: infra
+      - name: Upload backend.zip to S3 deployment bucket
         run: |
-          terraform init \
-            -backend-config="key=dev/terraform.tfstate"
+          aws s3 cp build/backend.zip "s3://${{ secrets.DEPLOYMENT_S3_BUCKET }}/backend.zip"
 
-      - name: Terraform Plan
-        working-directory: infra
+      - name: Deploy CloudFormation stack
         run: |
-          terraform plan \
-            -var-file=environments/dev.tfvars \
-            -out=tfplan
+          aws cloudformation deploy \
+            --template-file infra/cloudformation-infra/main.yaml \
+            --stack-name taskflow-dev \
+            --parameter-overrides \
+              $(cat infra/cloudformation-infra/parameters/dev.json | jq -r '.[] | "\(.ParameterKey)=\(.ParameterValue)"') \
+              DBMasterPassword=${{ secrets.DB_MASTER_PASSWORD }} \
+              JwtSecretKey=${{ secrets.JWT_SECRET_KEY }} \
+              LambdaS3Bucket=${{ secrets.DEPLOYMENT_S3_BUCKET }} \
+              LambdaS3Key=backend.zip \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --no-fail-on-empty-changeset
 
-      - name: Terraform Apply
-        working-directory: infra
-        run: terraform apply -auto-approve tfplan
-
-      - name: Get Terraform Outputs
-        id: tf-outputs
-        working-directory: infra
+      - name: Get stack outputs
+        id: cfn-outputs
         run: |
-          echo "s3_bucket=$(terraform output -raw s3_bucket_name)" >> "$GITHUB_OUTPUT"
-          echo "lambda_function=$(terraform output -raw lambda_function_name)" >> "$GITHUB_OUTPUT"
-          echo "cloudfront_id=$(terraform output -raw cloudfront_distribution_id)" >> "$GITHUB_OUTPUT"
-
-      - name: Upload frontend to S3
-        run: |
-          aws s3 sync frontend/dist/ "s3://${{ steps.tf-outputs.outputs.s3_bucket }}" \
-            --delete
+          STACK_OUTPUT=$(aws cloudformation describe-stacks --stack-name taskflow-dev --query "Stacks[0].Outputs" --output json)
+          echo "s3_bucket=$(echo $STACK_OUTPUT | jq -r '.[] | select(.OutputKey=="FrontendBucketName") | .OutputValue')" >> "$GITHUB_OUTPUT"
+          echo "lambda_function=$(echo $STACK_OUTPUT | jq -r '.[] | select(.OutputKey=="LambdaFunctionName") | .OutputValue')" >> "$GITHUB_OUTPUT"
+          echo "cloudfront_id=$(echo $STACK_OUTPUT | jq -r '.[] | select(.OutputKey=="CloudFrontDistributionId") | .OutputValue')" >> "$GITHUB_OUTPUT"
 
       - name: Update Lambda function code
         run: |
           aws lambda update-function-code \
-            --function-name "${{ steps.tf-outputs.outputs.lambda_function }}" \
-            --zip-file fileb://build/backend.zip
+            --function-name "${{ steps.cfn-outputs.outputs.lambda_function }}" \
+            --s3-bucket "${{ secrets.DEPLOYMENT_S3_BUCKET }}" \
+            --s3-key backend.zip
+
+      - name: Sync frontend to S3
+        run: |
+          aws s3 sync frontend/dist/ "s3://${{ steps.cfn-outputs.outputs.s3_bucket }}" \
+            --delete
 
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id "${{ steps.tf-outputs.outputs.cloudfront_id }}" \
+            --distribution-id "${{ steps.cfn-outputs.outputs.cloudfront_id }}" \
             --paths "/*"
 
   # ====================
@@ -196,8 +191,6 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
-      TF_VAR_db_password: ${{ secrets.TF_VAR_DB_PASSWORD }}
-      TF_VAR_jwt_secret_key: ${{ secrets.TF_VAR_JWT_SECRET_KEY }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -214,51 +207,48 @@ jobs:
           name: frontend-dist
           path: frontend/dist/
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_wrapper: false
-
-      - name: Terraform Init
-        working-directory: infra
+      - name: Upload backend.zip to S3 deployment bucket
         run: |
-          terraform init \
-            -backend-config="key=staging/terraform.tfstate"
+          aws s3 cp build/backend.zip "s3://${{ secrets.DEPLOYMENT_S3_BUCKET }}/backend.zip"
 
-      - name: Terraform Plan
-        working-directory: infra
+      - name: Deploy CloudFormation stack
         run: |
-          terraform plan \
-            -var-file=environments/staging.tfvars \
-            -out=tfplan
+          aws cloudformation deploy \
+            --template-file infra/cloudformation-infra/main.yaml \
+            --stack-name taskflow-staging \
+            --parameter-overrides \
+              $(cat infra/cloudformation-infra/parameters/staging.json | jq -r '.[] | "\(.ParameterKey)=\(.ParameterValue)"') \
+              DBMasterPassword=${{ secrets.DB_MASTER_PASSWORD }} \
+              JwtSecretKey=${{ secrets.JWT_SECRET_KEY }} \
+              LambdaS3Bucket=${{ secrets.DEPLOYMENT_S3_BUCKET }} \
+              LambdaS3Key=backend.zip \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --no-fail-on-empty-changeset
 
-      - name: Terraform Apply
-        working-directory: infra
-        run: terraform apply -auto-approve tfplan
-
-      - name: Get Terraform Outputs
-        id: tf-outputs
-        working-directory: infra
+      - name: Get stack outputs
+        id: cfn-outputs
         run: |
-          echo "s3_bucket=$(terraform output -raw s3_bucket_name)" >> "$GITHUB_OUTPUT"
-          echo "lambda_function=$(terraform output -raw lambda_function_name)" >> "$GITHUB_OUTPUT"
-          echo "cloudfront_id=$(terraform output -raw cloudfront_distribution_id)" >> "$GITHUB_OUTPUT"
-
-      - name: Upload frontend to S3
-        run: |
-          aws s3 sync frontend/dist/ "s3://${{ steps.tf-outputs.outputs.s3_bucket }}" \
-            --delete
+          STACK_OUTPUT=$(aws cloudformation describe-stacks --stack-name taskflow-staging --query "Stacks[0].Outputs" --output json)
+          echo "s3_bucket=$(echo $STACK_OUTPUT | jq -r '.[] | select(.OutputKey=="FrontendBucketName") | .OutputValue')" >> "$GITHUB_OUTPUT"
+          echo "lambda_function=$(echo $STACK_OUTPUT | jq -r '.[] | select(.OutputKey=="LambdaFunctionName") | .OutputValue')" >> "$GITHUB_OUTPUT"
+          echo "cloudfront_id=$(echo $STACK_OUTPUT | jq -r '.[] | select(.OutputKey=="CloudFrontDistributionId") | .OutputValue')" >> "$GITHUB_OUTPUT"
 
       - name: Update Lambda function code
         run: |
           aws lambda update-function-code \
-            --function-name "${{ steps.tf-outputs.outputs.lambda_function }}" \
-            --zip-file fileb://build/backend.zip
+            --function-name "${{ steps.cfn-outputs.outputs.lambda_function }}" \
+            --s3-bucket "${{ secrets.DEPLOYMENT_S3_BUCKET }}" \
+            --s3-key backend.zip
+
+      - name: Sync frontend to S3
+        run: |
+          aws s3 sync frontend/dist/ "s3://${{ steps.cfn-outputs.outputs.s3_bucket }}" \
+            --delete
 
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id "${{ steps.tf-outputs.outputs.cloudfront_id }}" \
+            --distribution-id "${{ steps.cfn-outputs.outputs.cloudfront_id }}" \
             --paths "/*"
 
   # ====================
@@ -274,8 +264,6 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
-      TF_VAR_db_password: ${{ secrets.TF_VAR_DB_PASSWORD }}
-      TF_VAR_jwt_secret_key: ${{ secrets.TF_VAR_JWT_SECRET_KEY }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -292,49 +280,46 @@ jobs:
           name: frontend-dist
           path: frontend/dist/
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_wrapper: false
-
-      - name: Terraform Init
-        working-directory: infra
+      - name: Upload backend.zip to S3 deployment bucket
         run: |
-          terraform init \
-            -backend-config="key=prod/terraform.tfstate"
+          aws s3 cp build/backend.zip "s3://${{ secrets.DEPLOYMENT_S3_BUCKET }}/backend.zip"
 
-      - name: Terraform Plan
-        working-directory: infra
+      - name: Deploy CloudFormation stack
         run: |
-          terraform plan \
-            -var-file=environments/prod.tfvars \
-            -out=tfplan
+          aws cloudformation deploy \
+            --template-file infra/cloudformation-infra/main.yaml \
+            --stack-name taskflow-prod \
+            --parameter-overrides \
+              $(cat infra/cloudformation-infra/parameters/prod.json | jq -r '.[] | "\(.ParameterKey)=\(.ParameterValue)"') \
+              DBMasterPassword=${{ secrets.DB_MASTER_PASSWORD }} \
+              JwtSecretKey=${{ secrets.JWT_SECRET_KEY }} \
+              LambdaS3Bucket=${{ secrets.DEPLOYMENT_S3_BUCKET }} \
+              LambdaS3Key=backend.zip \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --no-fail-on-empty-changeset
 
-      - name: Terraform Apply
-        working-directory: infra
-        run: terraform apply -auto-approve tfplan
-
-      - name: Get Terraform Outputs
-        id: tf-outputs
-        working-directory: infra
+      - name: Get stack outputs
+        id: cfn-outputs
         run: |
-          echo "s3_bucket=$(terraform output -raw s3_bucket_name)" >> "$GITHUB_OUTPUT"
-          echo "lambda_function=$(terraform output -raw lambda_function_name)" >> "$GITHUB_OUTPUT"
-          echo "cloudfront_id=$(terraform output -raw cloudfront_distribution_id)" >> "$GITHUB_OUTPUT"
-
-      - name: Upload frontend to S3
-        run: |
-          aws s3 sync frontend/dist/ "s3://${{ steps.tf-outputs.outputs.s3_bucket }}" \
-            --delete
+          STACK_OUTPUT=$(aws cloudformation describe-stacks --stack-name taskflow-prod --query "Stacks[0].Outputs" --output json)
+          echo "s3_bucket=$(echo $STACK_OUTPUT | jq -r '.[] | select(.OutputKey=="FrontendBucketName") | .OutputValue')" >> "$GITHUB_OUTPUT"
+          echo "lambda_function=$(echo $STACK_OUTPUT | jq -r '.[] | select(.OutputKey=="LambdaFunctionName") | .OutputValue')" >> "$GITHUB_OUTPUT"
+          echo "cloudfront_id=$(echo $STACK_OUTPUT | jq -r '.[] | select(.OutputKey=="CloudFrontDistributionId") | .OutputValue')" >> "$GITHUB_OUTPUT"
 
       - name: Update Lambda function code
         run: |
           aws lambda update-function-code \
-            --function-name "${{ steps.tf-outputs.outputs.lambda_function }}" \
-            --zip-file fileb://build/backend.zip
+            --function-name "${{ steps.cfn-outputs.outputs.lambda_function }}" \
+            --s3-bucket "${{ secrets.DEPLOYMENT_S3_BUCKET }}" \
+            --s3-key backend.zip
+
+      - name: Sync frontend to S3
+        run: |
+          aws s3 sync frontend/dist/ "s3://${{ steps.cfn-outputs.outputs.s3_bucket }}" \
+            --delete
 
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id "${{ steps.tf-outputs.outputs.cloudfront_id }}" \
+            --distribution-id "${{ steps.cfn-outputs.outputs.cloudfront_id }}" \
             --paths "/*"

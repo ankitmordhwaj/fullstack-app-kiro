@@ -1,0 +1,110 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: TaskFlow Database Stack - Aurora PostgreSQL Serverless v2
+
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Deployment environment
+
+  VpcId:
+    Type: String
+    Description: VPC ID from networking stack
+
+  PrivateSubnetIds:
+    Type: CommaDelimitedList
+    Description: Comma-separated list of private subnet IDs
+
+  RdsSecurityGroupId:
+    Type: String
+    Description: Security group ID for RDS cluster
+
+  DBMinCapacity:
+    Type: Number
+    Default: 0.5
+    Description: Minimum Aurora Capacity Units (ACUs)
+
+  DBMaxCapacity:
+    Type: Number
+    Default: 2
+    Description: Maximum Aurora Capacity Units (ACUs)
+
+  DBMasterUsername:
+    Type: String
+    Description: Master username for the Aurora cluster
+
+  DBMasterPassword:
+    Type: String
+    NoEcho: true
+    Description: Master password for the Aurora cluster
+
+  DBName:
+    Type: String
+    Default: taskflow
+    Description: Name of the default database
+
+Resources:
+  # ============================================================
+  # DB Subnet Group
+  # ============================================================
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: !Sub 'Subnet group for taskflow-${Environment} Aurora cluster'
+      SubnetIds: !Ref PrivateSubnetIds
+      Tags:
+        - Key: Name
+          Value: !Sub 'taskflow-${Environment}-db-subnet-group'
+
+  # ============================================================
+  # Aurora PostgreSQL Serverless v2 Cluster
+  # ============================================================
+  AuroraCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      DBClusterIdentifier: !Sub 'taskflow-${Environment}-aurora-cluster'
+      Engine: aurora-postgresql
+      EngineVersion: '15.4'
+      DatabaseName: !Ref DBName
+      MasterUsername: !Ref DBMasterUsername
+      MasterUserPassword: !Ref DBMasterPassword
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref RdsSecurityGroupId
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: !Ref DBMinCapacity
+        MaxCapacity: !Ref DBMaxCapacity
+      StorageEncrypted: true
+      Tags:
+        - Key: Name
+          Value: !Sub 'taskflow-${Environment}-aurora-cluster'
+
+  # ============================================================
+  # Aurora DB Instance (Serverless v2)
+  # ============================================================
+  AuroraInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub 'taskflow-${Environment}-aurora-instance-1'
+      DBClusterIdentifier: !Ref AuroraCluster
+      DBInstanceClass: db.serverless
+      Engine: aurora-postgresql
+      Tags:
+        - Key: Name
+          Value: !Sub 'taskflow-${Environment}-aurora-instance-1'
+
+Outputs:
+  ClusterEndpoint:
+    Description: Aurora cluster endpoint
+    Value: !GetAtt AuroraCluster.Endpoint.Address
+
+  ClusterPort:
+    Description: Aurora cluster port
+    Value: !GetAtt AuroraCluster.Endpoint.Port
+
+  DatabaseName:
+    Description: Database name
+    Value: !Ref DBName
