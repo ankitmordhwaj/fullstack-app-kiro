@@ -1,0 +1,133 @@
+.card {
+  background: #FFFFFF;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.badges {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* Priority badge colours */
+.priorityLow {
+  background-color: #D1FAE5;
+  color: #065F46;
+}
+
+.priorityMedium {
+  background-color: #FEF3C7;
+  color: #92400E;
+}
+
+.priorityHigh {
+  background-color: #FEE2E2;
+  color: #991B1B;
+}
+
+/* Status badge colours */
+.statusPending {
+  background-color: #F3F4F6;
+  color: #374151;
+}
+
+.statusInprogress {
+  background-color: #DBEAFE;
+  color: #1E40AF;
+}
+
+.statusCompleted {
+  background-color: #D1FAE5;
+  color: #065F46;
+}
+
+.description {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.editButton {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 13px;
+  font-family: inherit;
+  background-color: transparent;
+  color: #2563EB;
+  border: 1px solid #BFDBFE;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.editButton:hover {
+  background-color: #EFF6FF;
+}
+
+.editButton:focus-visible {
+  outline: 2px solid #2563EB;
+  outline-offset: 2px;
+}
+
+.deleteButton {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 13px;
+  font-family: inherit;
+  background-color: transparent;
+  color: #EF4444;
+  border: 1px solid #FECACA;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.deleteButton:hover {
+  background-color: #FEF2F2;
+}
+
+.deleteButton:focus-visible {
+  outline: 2px solid #EF4444;
+  outline-offset: 2px;
+}

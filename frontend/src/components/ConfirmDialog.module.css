@@ -1,0 +1,70 @@
+.dialog {
+  background: #FFFFFF;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  max-width: 420px;
+  width: 100%;
+}
+
+.dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.message {
+  font-size: 16px;
+  color: #111827;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.cancelButton {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  font-family: inherit;
+  background-color: transparent;
+  color: #374151;
+  border: 1px solid #E5E7EB;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.cancelButton:hover {
+  background-color: #F9FAFB;
+}
+
+.cancelButton:focus-visible {
+  outline: 2px solid #2563EB;
+  outline-offset: 2px;
+}
+
+.confirmButton {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  font-family: inherit;
+  background-color: #EF4444;
+  color: #FFFFFF;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.confirmButton:hover {
+  background-color: #dc2626;
+}
+
+.confirmButton:focus-visible {
+  outline: 2px solid #EF4444;
+  outline-offset: 2px;
+}
