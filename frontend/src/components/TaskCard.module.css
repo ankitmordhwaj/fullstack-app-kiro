@@ -1,8 +1,8 @@
 .card {
-  background: #FFFFFF;
+  background: var(--color-surface);
   padding: 16px;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -18,7 +18,7 @@
 .title {
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: var(--color-text-main);
   margin: 0;
   line-height: 1.4;
   flex: 1;
@@ -44,39 +44,39 @@
 
 /* Priority badge colours */
 .priorityLow {
-  background-color: #D1FAE5;
-  color: #065F46;
+  background-color: var(--color-badge-green-bg);
+  color: var(--color-badge-green-text);
 }
 
 .priorityMedium {
-  background-color: #FEF3C7;
-  color: #92400E;
+  background-color: var(--color-badge-yellow-bg);
+  color: var(--color-badge-yellow-text);
 }
 
 .priorityHigh {
-  background-color: #FEE2E2;
-  color: #991B1B;
+  background-color: var(--color-badge-red-bg);
+  color: var(--color-badge-red-text);
 }
 
 /* Status badge colours */
 .statusPending {
-  background-color: #F3F4F6;
-  color: #374151;
+  background-color: var(--color-badge-gray-bg);
+  color: var(--color-badge-gray-text);
 }
 
 .statusInprogress {
-  background-color: #DBEAFE;
-  color: #1E40AF;
+  background-color: var(--color-badge-blue-bg);
+  color: var(--color-badge-blue-text);
 }
 
 .statusCompleted {
-  background-color: #D1FAE5;
-  color: #065F46;
+  background-color: var(--color-badge-green-bg);
+  color: var(--color-badge-green-text);
 }
 
 .description {
   font-size: 14px;
-  color: #6B7280;
+  color: var(--color-text-muted);
   margin: 0;
   line-height: 1.5;
   word-break: break-word;
@@ -95,18 +95,18 @@
   font-size: 13px;
   font-family: inherit;
   background-color: transparent;
-  color: #00BCD4;
-  border: 1px solid #B2EBF2;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary-light);
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
 .editButton:hover {
-  background-color: #E0F7FA;
+  background-color: var(--color-primary-light);
 }
 
 .editButton:focus-visible {
-  outline: 2px solid #00BCD4;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -117,17 +117,17 @@
   font-size: 13px;
   font-family: inherit;
   background-color: transparent;
-  color: #EF4444;
-  border: 1px solid #FECACA;
+  color: var(--color-error);
+  border: 1px solid var(--color-error-border);
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
 .deleteButton:hover {
-  background-color: #FEF2F2;
+  background-color: var(--color-error-bg);
 }
 
 .deleteButton:focus-visible {
-  outline: 2px solid #EF4444;
+  outline: 2px solid var(--color-error);
   outline-offset: 2px;
 }

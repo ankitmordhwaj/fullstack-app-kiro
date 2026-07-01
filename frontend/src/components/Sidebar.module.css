@@ -4,7 +4,7 @@
   left: 0;
   height: 100vh;
   width: 240px;
-  background: #ffffff;
+  background: var(--color-surface);
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
@@ -42,7 +42,7 @@
   padding-bottom: 32px;
   font-size: 20px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--color-text-main);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -76,7 +76,7 @@
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-text-sub);
   text-decoration: none;
   transition: background 0.15s ease;
   cursor: pointer;
@@ -87,22 +87,22 @@
 }
 
 .navItem:hover {
-  background: #f3f4f6;
+  background: var(--color-surface-alt);
 }
 
 .navItem:focus-visible {
-  outline: 2px solid #00bcd4;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
 .navItemActive {
-  background: #00bcd4;
-  color: #ffffff;
+  background: var(--color-primary);
+  color: #FFFFFF;
   font-weight: 600;
 }
 
 .navItemActive:hover {
-  background: #00bcd4;
+  background: var(--color-primary);
 }
 
 .navItemCollapsed {
@@ -119,7 +119,7 @@
 .logoutSection {
   margin-top: auto;
   padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--color-border);
 }
 
 /* Icon wrapper */

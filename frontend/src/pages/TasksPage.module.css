@@ -18,20 +18,20 @@
 
 .divider {
   border: none;
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid var(--color-border);
   margin: 0 0 24px 0;
 }
 
 .heading {
   font-size: 30px;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-text-main);
   margin: 0 0 4px 0;
 }
 
 .subheading {
   font-size: 14px;
-  color: #6B7280;
+  color: var(--color-text-muted);
   margin: 0;
 }
 
@@ -52,7 +52,7 @@
 
 .loadingText {
   font-size: 16px;
-  color: #6B7280;
+  color: var(--color-text-muted);
   margin: 0;
 }
 
@@ -64,9 +64,9 @@
   justify-content: center;
   text-align: center;
   padding: 80px 24px;
-  background: #FFFFFF;
+  background: var(--color-surface);
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  box-shadow: var(--shadow-md);
 }
 
 .emptyIcon {
@@ -77,13 +77,13 @@
 .emptyHeading {
   font-size: 20px;
   font-weight: 600;
-  color: #111827;
+  color: var(--color-text-main);
   margin: 0 0 8px 0;
 }
 
 .emptyText {
   font-size: 14px;
-  color: #6B7280;
+  color: var(--color-text-muted);
   margin: 0 0 24px 0;
 }
 

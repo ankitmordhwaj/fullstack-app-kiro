@@ -15,7 +15,7 @@
 }
 
 .button:focus-visible {
-  outline: 2px solid #00BCD4;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -26,42 +26,42 @@
 
 /* Primary variant */
 .primary {
-  background-color: #00BCD4;
+  background-color: var(--color-primary);
   color: #FFFFFF;
 }
 
 .primary:hover:not(:disabled) {
-  background-color: #00ACC1;
+  background-color: var(--color-primary-hover);
 }
 
 /* Secondary variant */
 .secondary {
-  background-color: #7C3AED;
+  background-color: var(--color-secondary);
   color: #FFFFFF;
 }
 
 .secondary:hover:not(:disabled) {
-  background-color: #6d28d9;
+  background-color: var(--color-secondary-hover);
 }
 
 /* Outline variant */
 .outline {
   background-color: transparent;
-  color: #374151;
-  border: 1px solid #E5E7EB;
+  color: var(--color-text-sub);
+  border: 1px solid var(--color-border);
 }
 
 .outline:hover:not(:disabled) {
-  background-color: #F9FAFB;
+  background-color: var(--color-surface-hover);
 }
 
 /* Ghost variant */
 .ghost {
   background-color: transparent;
-  color: #374151;
+  color: var(--color-text-sub);
   border: none;
 }
 
 .ghost:hover:not(:disabled) {
-  background-color: #F3F4F6;
+  background-color: var(--color-surface-alt);
 }

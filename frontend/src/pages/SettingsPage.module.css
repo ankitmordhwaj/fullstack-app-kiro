@@ -25,7 +25,7 @@
 .card {
   background: var(--color-surface);
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-md);
   padding: 16px;
 }
 
@@ -103,10 +103,10 @@
   align-items: center;
   gap: 8px;
   padding: 12px 14px;
-  background-color: #D1FAE5;
-  border: 1px solid #6EE7B7;
+  background-color: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
   border-radius: 8px;
-  color: #065F46;
+  color: var(--color-success-text);
   font-size: 14px;
 }
 
@@ -116,10 +116,10 @@
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  background-color: #FEF2F2;
-  border: 1px solid #FECACA;
+  background-color: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
   border-radius: 8px;
-  color: var(--color-error);
+  color: var(--color-error-text);
   font-size: 14px;
 }
 
@@ -181,7 +181,7 @@
 }
 
 .themeOption:hover:not(.themeOptionActive) {
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--color-surface-alt);
 }
 
 .themeOptionActive {
@@ -190,21 +190,10 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Dark theme adjustments for elements with hardcoded colors */
-:global([data-theme="dark"]) .successMessage {
-  background-color: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.3);
-  color: #6EE7B7;
-}
-
-:global([data-theme="dark"]) .errorBanner {
-  background-color: rgba(239, 68, 68, 0.15);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #FCA5A5;
-}
-
-:global([data-theme="dark"]) .themeOption:hover:not(.themeOptionActive) {
-  background: rgba(255, 255, 255, 0.08);
+/* Strength Indicator Wrapper */
+.strengthIndicatorWrapper {
+  margin-top: 4px;
+  margin-bottom: 2px;
 }
 
 /* Responsive */

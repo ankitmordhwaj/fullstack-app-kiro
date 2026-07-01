@@ -8,15 +8,15 @@
 .label {
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-text-sub);
 }
 
 .select {
   padding: 10px 12px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: #FFFFFF;
-  color: #111827;
+  background: var(--color-surface);
+  color: var(--color-text-main);
   font-size: 16px;
   font-family: inherit;
   width: 100%;
@@ -31,16 +31,16 @@
 }
 
 .select:focus {
-  outline: 2px solid #00BCD4;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
 .selectError {
-  border-color: #EF4444;
+  border-color: var(--color-error);
 }
 
 .errorMessage {
   font-size: 13px;
-  color: #EF4444;
+  color: var(--color-error);
   margin-top: 2px;
 }

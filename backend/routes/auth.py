@@ -214,3 +214,75 @@ def update_profile():
 
     logger.info("Profile updated successfully: id=%s email=%s", user.id, email_lower)
     return jsonify(user.to_dict()), 200
+
+
+@auth_bp.route("/password", methods=["PUT"])
+@jwt_required()
+def change_password():
+    """Change the authenticated user's password.
+
+    Validates the current password, enforces new password strength rules,
+    and updates the stored hash.
+
+    Returns:
+        200 + ``{ "message": "Password changed successfully." }`` on success.
+        400 + ``{ "errors": {...} }`` when required fields are missing.
+        400 + ``{ "error": "..." }`` when new password fails strength validation.
+        401 + ``{ "error": "..." }`` when current password is incorrect.
+        500 + ``{ "error": "..." }`` on database error.
+    """
+    user_id = get_jwt_identity()
+    user = User.query.get(int(user_id))
+
+    if user is None:
+        logger.warning("Password change attempted for non-existent user id=%s", user_id)
+        return jsonify({"error": "User not found."}), 404
+
+    data: dict = request.get_json(silent=True) or {}
+
+    current_password: str = data.get("current_password") or ""
+    new_password: str = data.get("new_password") or ""
+
+    # --- Required field validation ---
+    errors: dict[str, str] = {}
+
+    if not current_password:
+        errors["current_password"] = "Current password is required."
+    if not new_password:
+        errors["new_password"] = "New password is required."
+
+    if errors:
+        logger.info("Password change validation failed for user id=%s: missing fields %s", user_id, list(errors.keys()))
+        return jsonify({"errors": errors}), 400
+
+    # --- New password strength validation (priority order) ---
+    if len(new_password) < 8 or len(new_password) > 128:
+        logger.info("Password change rejected for user id=%s: length requirement not met", user_id)
+        return jsonify({"error": "Password must be between 8 and 128 characters."}), 400
+
+    if not any(c.isupper() for c in new_password):
+        logger.info("Password change rejected for user id=%s: missing uppercase letter", user_id)
+        return jsonify({"error": "Password must contain at least one uppercase letter."}), 400
+
+    special_characters = set("!@#$%^&*()_+-=[]{}|;:',.<>?/`~\"")
+    if not any(c in special_characters for c in new_password):
+        logger.info("Password change rejected for user id=%s: missing special character", user_id)
+        return jsonify({"error": "Password must contain at least one special character."}), 400
+
+    # --- Verify current password ---
+    if not user.check_password(current_password):
+        logger.info("Password change failed for user id=%s: current password incorrect", user_id)
+        return jsonify({"error": "Current password is incorrect."}), 401
+
+    # --- Update password ---
+    user.set_password(new_password)
+
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        logger.exception("Database error while changing password for user id=%s", user_id)
+        return jsonify({"error": "An unexpected error occurred. Please try again."}), 500
+
+    logger.info("Password changed successfully for user id=%s", user_id)
+    return jsonify({"message": "Password changed successfully."}), 200

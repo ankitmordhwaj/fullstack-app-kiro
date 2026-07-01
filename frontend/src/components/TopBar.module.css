@@ -13,12 +13,12 @@
 }
 
 .searchInput {
-  background: #F3F4F6;
+  background: var(--color-surface-alt);
   border: none;
   border-radius: 8px;
   padding: 8px 16px 8px 40px;
   font-size: 14px;
-  color: #1A1A2E;
+  color: var(--color-text-main);
   width: 240px;
   font-family: inherit;
   outline: none;
@@ -26,11 +26,11 @@
 }
 
 .searchInput::placeholder {
-  color: #9CA3AF;
+  color: var(--color-text-placeholder);
 }
 
 .searchInput:focus {
-  box-shadow: 0 0 0 2px #00BCD4;
+  box-shadow: 0 0 0 2px var(--color-primary);
 }
 
 .searchWrapper {
@@ -42,7 +42,7 @@
 .searchIcon {
   position: absolute;
   left: 12px;
-  color: #9CA3AF;
+  color: var(--color-text-placeholder);
   display: flex;
   align-items: center;
   pointer-events: none;
@@ -51,7 +51,7 @@
 .pageTitle {
   font-size: 18px;
   font-weight: 600;
-  color: #1A1A2E;
+  color: var(--color-text-main);
   margin: 0;
 }
 
@@ -65,16 +65,16 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  color: #374151;
+  color: var(--color-text-sub);
   transition: background 0.15s ease;
 }
 
 .hamburgerButton:hover {
-  background: #F3F4F6;
+  background: var(--color-surface-alt);
 }
 
 .hamburgerButton:focus-visible {
-  outline: 2px solid #00BCD4;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -91,7 +91,7 @@
   width: 36px;
   height: 36px;
   border-radius: 9999px;
-  background: #00BCD4;
+  background: var(--color-primary);
   color: #FFFFFF;
   font-size: 14px;
   font-weight: 600;
@@ -106,14 +106,14 @@
 .userName {
   font-size: 14px;
   font-weight: 500;
-  color: #1A1A2E;
+  color: var(--color-text-main);
   line-height: 1.3;
 }
 
 .userRole {
   font-size: 12px;
   font-weight: 400;
-  color: #6B7280;
+  color: var(--color-text-muted);
   line-height: 1.3;
 }
 
@@ -122,7 +122,7 @@
   width: 36px;
   height: 36px;
   border-radius: 9999px;
-  background: #E5E7EB;
+  background: var(--color-border);
   flex-shrink: 0;
 }
 
@@ -136,12 +136,12 @@
   width: 100px;
   height: 14px;
   border-radius: 4px;
-  background: #E5E7EB;
+  background: var(--color-border);
 }
 
 .skeletonRole {
   width: 60px;
   height: 12px;
   border-radius: 4px;
-  background: #E5E7EB;
+  background: var(--color-border);
 }

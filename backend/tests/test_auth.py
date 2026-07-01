@@ -264,3 +264,204 @@ class TestLoginBadCredentials:
         error_lower = body["error"].lower()
         assert "email not found" not in error_lower
         assert "not registered" not in error_lower
+
+
+# ===========================================================================
+# PUT /auth/password — helpers
+# ===========================================================================
+
+def _get_auth_token(client):
+    """Register a user and log in, returning the access token."""
+    _register(client, VALID_REG_PAYLOAD)
+    res = _login(client, {"email": "alice@example.com", "password": "securepass"})
+    return res.get_json()["access_token"]
+
+
+def _change_password(client, token, payload):
+    return client.put(
+        "/auth/password",
+        data=json.dumps(payload),
+        content_type="application/json",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+
+# ===========================================================================
+# PUT /auth/password — success
+# ===========================================================================
+
+class TestChangePasswordSuccess:
+    @pytest.fixture(autouse=True)
+    def setup_user(self, client):
+        self.token = _get_auth_token(client)
+        self.client = client
+
+    def test_returns_200(self):
+        res = _change_password(self.client, self.token, {
+            "current_password": "securepass",
+            "new_password": "NewPass1!",
+        })
+        assert res.status_code == 200
+
+    def test_returns_success_message(self):
+        res = _change_password(self.client, self.token, {
+            "current_password": "securepass",
+            "new_password": "NewPass1!",
+        })
+        body = res.get_json()
+        assert body["message"] == "Password changed successfully."
+
+    def test_new_password_works_for_login(self):
+        _change_password(self.client, self.token, {
+            "current_password": "securepass",
+            "new_password": "NewPass1!",
+        })
+        res = _login(self.client, {"email": "alice@example.com", "password": "NewPass1!"})
+        assert res.status_code == 200
+
+    def test_old_password_no_longer_works(self):
+        _change_password(self.client, self.token, {
+            "current_password": "securepass",
+            "new_password": "NewPass1!",
+        })
+        res = _login(self.client, {"email": "alice@example.com", "password": "securepass"})
+        assert res.status_code == 401
+
+
+# ===========================================================================
+# PUT /auth/password — missing fields (400)
+# ===========================================================================
+
+class TestChangePasswordMissingFields:
+    @pytest.fixture(autouse=True)
+    def setup_user(self, client):
+        self.token = _get_auth_token(client)
+        self.client = client
+
+    def test_missing_current_password(self):
+        res = _change_password(self.client, self.token, {
+            "new_password": "NewPass1!",
+        })
+        assert res.status_code == 400
+        errors = res.get_json()["errors"]
+        assert "current_password" in errors
+        assert errors["current_password"] == "Current password is required."
+
+    def test_missing_new_password(self):
+        res = _change_password(self.client, self.token, {
+            "current_password": "securepass",
+        })
+        assert res.status_code == 400
+        errors = res.get_json()["errors"]
+        assert "new_password" in errors
+        assert errors["new_password"] == "New password is required."
+
+    def test_missing_both_fields(self):
+        res = _change_password(self.client, self.token, {})
+        assert res.status_code == 400
+        errors = res.get_json()["errors"]
+        assert "current_password" in errors
+        assert "new_password" in errors
+
+
+# ===========================================================================
+# PUT /auth/password — password strength validation (400)
+# ===========================================================================
+
+class TestChangePasswordStrengthValidation:
+    @pytest.fixture(autouse=True)
+    def setup_user(self, client):
+        self.token = _get_auth_token(client)
+        self.client = client
+
+    def test_new_password_too_short(self):
+        res = _change_password(self.client, self.token, {
+            "current_password": "securepass",
+            "new_password": "Short1!",
+        })
+        assert res.status_code == 400
+        assert res.get_json()["error"] == "Password must be between 8 and 128 characters."
+
+    def test_new_password_too_long(self):
+        res = _change_password(self.client, self.token, {
+            "current_password": "securepass",
+            "new_password": "A!" + "a" * 127,  # 129 chars
+        })
+        assert res.status_code == 400
+        assert res.get_json()["error"] == "Password must be between 8 and 128 characters."
+
+    def test_new_password_missing_uppercase(self):
+        res = _change_password(self.client, self.token, {
+            "current_password": "securepass",
+            "new_password": "lowercase1!",
+        })
+        assert res.status_code == 400
+        assert res.get_json()["error"] == "Password must contain at least one uppercase letter."
+
+    def test_new_password_missing_special_char(self):
+        res = _change_password(self.client, self.token, {
+            "current_password": "securepass",
+            "new_password": "NoSpecial1A",
+        })
+        assert res.status_code == 400
+        assert res.get_json()["error"] == "Password must contain at least one special character."
+
+    def test_multiple_failures_returns_first_in_priority_order(self):
+        """Short password also missing uppercase and special char — returns length error."""
+        res = _change_password(self.client, self.token, {
+            "current_password": "securepass",
+            "new_password": "short",
+        })
+        assert res.status_code == 400
+        assert res.get_json()["error"] == "Password must be between 8 and 128 characters."
+
+
+# ===========================================================================
+# PUT /auth/password — wrong current password (401)
+# ===========================================================================
+
+class TestChangePasswordWrongCurrent:
+    @pytest.fixture(autouse=True)
+    def setup_user(self, client):
+        self.token = _get_auth_token(client)
+        self.client = client
+
+    def test_wrong_current_password_returns_401(self):
+        res = _change_password(self.client, self.token, {
+            "current_password": "wrongpassword",
+            "new_password": "NewPass1!",
+        })
+        assert res.status_code == 401
+        assert res.get_json()["error"] == "Current password is incorrect."
+
+    def test_password_not_changed_on_wrong_current(self):
+        """Original password should still work after a failed attempt."""
+        _change_password(self.client, self.token, {
+            "current_password": "wrongpassword",
+            "new_password": "NewPass1!",
+        })
+        res = _login(self.client, {"email": "alice@example.com", "password": "securepass"})
+        assert res.status_code == 200
+
+
+# ===========================================================================
+# PUT /auth/password — authentication required (401)
+# ===========================================================================
+
+class TestChangePasswordAuth:
+    def test_no_token_returns_401(self, client):
+        res = client.put(
+            "/auth/password",
+            data=json.dumps({"current_password": "x", "new_password": "NewPass1!"}),
+            content_type="application/json",
+        )
+        assert res.status_code == 401
+
+    def test_invalid_token_returns_401(self, client):
+        res = client.put(
+            "/auth/password",
+            data=json.dumps({"current_password": "x", "new_password": "NewPass1!"}),
+            content_type="application/json",
+            headers={"Authorization": "Bearer invalid-token-here"},
+        )
+        assert res.status_code == 422 or res.status_code == 401

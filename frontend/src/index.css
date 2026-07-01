@@ -6,18 +6,103 @@
 
 :root {
   --color-primary: #00BCD4;
+  --color-primary-hover: #00ACC1;
+  --color-primary-light: #E0F7FA;
   --color-secondary: #7C3AED;
+  --color-secondary-hover: #6d28d9;
   --color-accent: #06B6D4;
-  --color-background: #F9FAFB;
+  --color-background: #F0F4F8;
   --color-surface: #FFFFFF;
+  --color-surface-hover: #F9FAFB;
+  --color-surface-alt: #F3F4F6;
   --color-border: #E5E7EB;
-  --color-text-main: #111827;
+  --color-text-main: #1A1A2E;
   --color-text-muted: #6B7280;
   --color-text-sub: #374151;
+  --color-text-placeholder: #9CA3AF;
   --color-success: #10B981;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
+  --color-error-hover: #dc2626;
   --color-info: #3B82F6;
+
+  /* Badge backgrounds */
+  --color-badge-green-bg: #D1FAE5;
+  --color-badge-green-text: #065F46;
+  --color-badge-yellow-bg: #FEF3C7;
+  --color-badge-yellow-text: #92400E;
+  --color-badge-red-bg: #FEE2E2;
+  --color-badge-red-text: #991B1B;
+  --color-badge-gray-bg: #F3F4F6;
+  --color-badge-gray-text: #374151;
+  --color-badge-blue-bg: #DBEAFE;
+  --color-badge-blue-text: #1E40AF;
+
+  /* Error states */
+  --color-error-bg: #FEF2F2;
+  --color-error-border: #FECACA;
+  --color-error-text: #991B1B;
+
+  /* Success states */
+  --color-success-bg: #D1FAE5;
+  --color-success-border: #6EE7B7;
+  --color-success-text: #065F46;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+  --color-primary: #00BCD4;
+  --color-primary-hover: #26C6DA;
+  --color-primary-light: rgba(0, 188, 212, 0.15);
+  --color-secondary: #7C3AED;
+  --color-secondary-hover: #8B5CF6;
+  --color-background: #0F0F1A;
+  --color-surface: #1A1A2E;
+  --color-surface-hover: #2D2D44;
+  --color-surface-alt: #2D2D44;
+  --color-border: #3D3D5C;
+  --color-text-main: #F0F4F8;
+  --color-text-muted: #9CA3AF;
+  --color-text-sub: #D1D5DB;
+  --color-text-placeholder: #6B7280;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-error-hover: #F87171;
+  --color-info: #3B82F6;
+
+  /* Badge backgrounds (dark variants) */
+  --color-badge-green-bg: rgba(16, 185, 129, 0.2);
+  --color-badge-green-text: #6EE7B7;
+  --color-badge-yellow-bg: rgba(245, 158, 11, 0.2);
+  --color-badge-yellow-text: #FCD34D;
+  --color-badge-red-bg: rgba(239, 68, 68, 0.2);
+  --color-badge-red-text: #FCA5A5;
+  --color-badge-gray-bg: rgba(107, 114, 128, 0.2);
+  --color-badge-gray-text: #D1D5DB;
+  --color-badge-blue-bg: rgba(59, 130, 246, 0.2);
+  --color-badge-blue-text: #93C5FD;
+
+  /* Error states */
+  --color-error-bg: rgba(239, 68, 68, 0.15);
+  --color-error-border: rgba(239, 68, 68, 0.3);
+  --color-error-text: #FCA5A5;
+
+  /* Success states */
+  --color-success-bg: rgba(16, 185, 129, 0.15);
+  --color-success-border: rgba(16, 185, 129, 0.3);
+  --color-success-text: #6EE7B7;
+
+  /* Shadows (more subtle in dark mode) */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
 body {
@@ -37,32 +122,5 @@ input, select, textarea {
 }
 
 input::placeholder, textarea::placeholder {
-  color: var(--color-text-muted);
-}
-
-[data-theme="dark"] {
-  --color-primary: #00BCD4;
-  --color-background: #1A1A2E;
-  --color-surface: #2D2D44;
-  --color-border: #3D3D5C;
-  --color-text-main: #F0F4F8;
-  --color-text-muted: #9CA3AF;
-  --color-text-sub: #D1D5DB;
-  --color-success: #10B981;
-  --color-warning: #F59E0B;
-  --color-error: #EF4444;
-  --color-info: #3B82F6;
-}
-
-[data-theme="dark"] input,
-[data-theme="dark"] select,
-[data-theme="dark"] textarea {
-  background: #2D2D44;
-  color: #F0F4F8;
-  border-color: #3D3D5C;
-}
-
-[data-theme="dark"] input::placeholder,
-[data-theme="dark"] textarea::placeholder {
-  color: #9CA3AF;
+  color: var(--color-text-placeholder);
 }
