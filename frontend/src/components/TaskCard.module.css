@@ -95,18 +95,18 @@
   font-size: 13px;
   font-family: inherit;
   background-color: transparent;
-  color: #2563EB;
-  border: 1px solid #BFDBFE;
+  color: #00BCD4;
+  border: 1px solid #B2EBF2;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
 .editButton:hover {
-  background-color: #EFF6FF;
+  background-color: #E0F7FA;
 }
 
 .editButton:focus-visible {
-  outline: 2px solid #2563EB;
+  outline: 2px solid #00BCD4;
   outline-offset: 2px;
 }
 

@@ -1,51 +1,42 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import { ThemeProvider } from './context/ThemeContext';
+import DashboardLayout from './components/DashboardLayout';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import TasksPage from './pages/TasksPage';
 import CreateTaskPage from './pages/CreateTaskPage';
 import EditTaskPage from './pages/EditTaskPage';
+import SettingsPage from './pages/SettingsPage';
+
+function ComingSoon({ title }: Readonly<{ title: string }>) {
+  return <h1>{title} — Coming Soon</h1>;
+}
 
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
+      <ThemeProvider>
+        <AuthProvider>
+          <Routes>
           {/* Public routes */}
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Protected routes */}
-          <Route
-            path="/tasks"
-            element={
-              <ProtectedRoute>
-                <TasksPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/tasks/new"
-            element={
-              <ProtectedRoute>
-                <CreateTaskPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/tasks/:id/edit"
-            element={
-              <ProtectedRoute>
-                <EditTaskPage />
-              </ProtectedRoute>
-            }
-          />
+          {/* Protected routes wrapped in DashboardLayout */}
+          <Route element={<DashboardLayout />}>
+            <Route path="/tasks" element={<TasksPage />} />
+            <Route path="/tasks/new" element={<CreateTaskPage />} />
+            <Route path="/tasks/:id/edit" element={<EditTaskPage />} />
+            <Route path="/team" element={<ComingSoon title="Team Members" />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Route>
 
           {/* Default redirect */}
           <Route path="/" element={<Navigate to="/tasks" replace />} />
         </Routes>
-      </AuthProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

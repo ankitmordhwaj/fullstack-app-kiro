@@ -22,12 +22,34 @@ export interface Task {
   user_id: number;
 }
 
+// Theme types
+export type Theme = 'light' | 'dark';
+
+export interface ThemeContextType {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+}
+
+// Profile update types
+export interface ProfileUpdatePayload {
+  full_name: string;
+  email: string;
+}
+
+export interface ProfileUpdateResponse {
+  id: number;
+  full_name: string;
+  email: string;
+  created_at: string;
+}
+
 // Auth context shape
 export interface AuthContextType {
   token: string | null;
   user: User | null;
   login: (token: string, refreshToken: string, user: User) => void;
   logout: () => void;
+  updateUser: (user: User) => void;
 }
 
 // API request payload shapes

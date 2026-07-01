@@ -1,11 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 :root {
-  --color-primary: #2563EB;
+  --color-primary: #00BCD4;
   --color-secondary: #7C3AED;
   --color-accent: #06B6D4;
   --color-background: #F9FAFB;
@@ -30,11 +30,39 @@ body {
 }
 
 input, select, textarea {
-  background: #FFFFFF;
-  color: #111827;
+  background: var(--color-surface);
+  color: var(--color-text-main);
+  border-color: var(--color-border);
   font-size: 16px;
 }
 
 input::placeholder, textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+[data-theme="dark"] {
+  --color-primary: #00BCD4;
+  --color-background: #1A1A2E;
+  --color-surface: #2D2D44;
+  --color-border: #3D3D5C;
+  --color-text-main: #F0F4F8;
+  --color-text-muted: #9CA3AF;
+  --color-text-sub: #D1D5DB;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: #2D2D44;
+  color: #F0F4F8;
+  border-color: #3D3D5C;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
   color: #9CA3AF;
 }

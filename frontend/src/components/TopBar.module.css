@@ -1,0 +1,147 @@
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  background: transparent;
+  padding: 0 24px;
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+}
+
+.searchInput {
+  background: #F3F4F6;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px 8px 40px;
+  font-size: 14px;
+  color: #1A1A2E;
+  width: 240px;
+  font-family: inherit;
+  outline: none;
+  transition: box-shadow 0.15s ease;
+}
+
+.searchInput::placeholder {
+  color: #9CA3AF;
+}
+
+.searchInput:focus {
+  box-shadow: 0 0 0 2px #00BCD4;
+}
+
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  color: #9CA3AF;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.pageTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1A1A2E;
+  margin: 0;
+}
+
+.hamburgerButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #374151;
+  transition: background 0.15s ease;
+}
+
+.hamburgerButton:hover {
+  background: #F3F4F6;
+}
+
+.hamburgerButton:focus-visible {
+  outline: 2px solid #00BCD4;
+  outline-offset: 2px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  background: #00BCD4;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1A1A2E;
+  line-height: 1.3;
+}
+
+.userRole {
+  font-size: 12px;
+  font-weight: 400;
+  color: #6B7280;
+  line-height: 1.3;
+}
+
+/* Skeleton placeholder for null user */
+.skeletonAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  background: #E5E7EB;
+  flex-shrink: 0;
+}
+
+.skeletonDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeletonName {
+  width: 100px;
+  height: 14px;
+  border-radius: 4px;
+  background: #E5E7EB;
+}
+
+.skeletonRole {
+  width: 60px;
+  height: 12px;
+  border-radius: 4px;
+  background: #E5E7EB;
+}

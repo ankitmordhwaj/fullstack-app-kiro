@@ -4,7 +4,12 @@ import logging
 import re
 
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    get_jwt_identity,
+    jwt_required,
+)
 
 from extensions import db
 from models.user import User
@@ -142,3 +147,70 @@ def login():
         ),
         200,
     )
+
+
+@auth_bp.route("/profile", methods=["PUT"])
+@jwt_required()
+def update_profile():
+    """Update the authenticated user's full_name and email.
+
+    Returns:
+        200 + updated user dict on success.
+        400 + ``{ "errors": {...} }`` on validation failure.
+        409 + ``{ "error": "..." }`` when new e-mail is taken by another user.
+        500 + ``{ "error": "..." }`` on database error.
+    """
+    user_id = get_jwt_identity()
+    user = User.query.get(int(user_id))
+
+    if user is None:
+        logger.warning("Profile update attempted for non-existent user id=%s", user_id)
+        return jsonify({"error": "User not found."}), 404
+
+    data: dict = request.get_json(silent=True) or {}
+
+    full_name: str = (data.get("full_name") or "").strip()
+    email: str = (data.get("email") or "").strip()
+
+    errors: dict[str, str] = {}
+
+    # --- full_name validation ---
+    if not full_name:
+        errors["full_name"] = "Full name is required."
+    elif len(full_name) > 255:
+        errors["full_name"] = "Full name must be 255 characters or fewer."
+
+    # --- email validation ---
+    if not email:
+        errors["email"] = "Email is required."
+    elif len(email) > 254:
+        errors["email"] = "Email must be 254 characters or fewer."
+    elif not _valid_email(email):
+        errors["email"] = "Email must be a valid email address."
+
+    if errors:
+        logger.info("Profile update validation failed for user id=%s: %s", user_id, list(errors.keys()))
+        return jsonify({"errors": errors}), 400
+
+    # Normalise email to lowercase for storage and uniqueness checks
+    email_lower = email.lower()
+
+    # Check email uniqueness excluding the current user
+    existing = User.query.filter(User.email == email_lower, User.id != user.id).first()
+    if existing:
+        logger.info("Profile update rejected — email already registered: %s (user id=%s)", email_lower, user_id)
+        return jsonify({"error": "Email is already registered."}), 409
+
+    # Update user fields (password is intentionally ignored)
+    user.full_name = full_name
+    user.email = email_lower
+
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        logger.exception("Database error while updating profile for user id=%s", user_id)
+        return jsonify({"error": "An unexpected error occurred."}), 500
+
+    logger.info("Profile updated successfully: id=%s email=%s", user.id, email_lower)
+    return jsonify(user.to_dict()), 200

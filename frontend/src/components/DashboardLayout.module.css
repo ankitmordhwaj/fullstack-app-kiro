@@ -1,0 +1,39 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: #F0F4F8;
+}
+
+.rightSide {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 240px;
+  transition: margin-left 0.2s ease;
+  padding: 8px 12px 12px 12px;
+}
+
+.rightSideCollapsed {
+  margin-left: 64px;
+}
+
+.rightSideHidden {
+  margin-left: 0;
+}
+
+.contentWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.main {
+  flex: 1;
+  padding: 24px;
+  background: transparent;
+  overflow-y: auto;
+}
