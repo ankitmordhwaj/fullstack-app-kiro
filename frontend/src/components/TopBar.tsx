@@ -1,5 +1,8 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getInitials, truncateName } from '../utils/navigation';
+import { getUnreadCount } from '../api/notifications';
+import NotificationIcon from './NotificationIcon';
 import styles from './TopBar.module.css';
 
 interface TopBarProps {
@@ -8,7 +11,23 @@ interface TopBarProps {
 }
 
 function TopBar({ onHamburgerClick, showHamburger }: TopBarProps) {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
+  useEffect(() => {
+    if (!token) return;
+
+    const fetchUnreadCount = () => {
+      getUnreadCount(token)
+        .then((data) => setUnreadCount(data.count))
+        .catch(() => {});
+    };
+
+    fetchUnreadCount();
+    const intervalId = setInterval(fetchUnreadCount, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [token]);
 
   return (
     <header className={styles.topBar}>
@@ -63,6 +82,7 @@ function TopBar({ onHamburgerClick, showHamburger }: TopBarProps) {
       </div>
 
       <div className={styles.userInfo}>
+        <NotificationIcon unreadCount={unreadCount} />
         {user ? (
           <>
             <div className={styles.avatar}>

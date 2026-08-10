@@ -3,10 +3,11 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { updateProfile } from '../api/profile';
+import { updatePreferences } from '../api/preferences';
 import { changePassword } from '../api/password';
 import PasswordStrengthIndicator from '../components/PasswordStrengthIndicator';
 import { NetworkError } from '../types';
-import type { Theme } from '../types';
+import type { Theme, AccentColor } from '../types';
 import styles from './SettingsPage.module.css';
 
 interface FieldErrors {
@@ -22,7 +23,7 @@ interface PasswordFieldErrors {
 
 function SettingsPage() {
   const { token, user, updateUser } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, accentColor, setAccentColor } = useTheme();
 
   const [fullName, setFullName] = useState<string>(user?.full_name ?? '');
   const [email, setEmail] = useState<string>(user?.email ?? '');
@@ -140,6 +141,33 @@ function SettingsPage() {
 
   const handleThemeChange = (newTheme: Theme): void => {
     setTheme(newTheme);
+  };
+
+  const ACCENT_OPTIONS: { id: AccentColor; label: string; swatch: string }[] = [
+    { id: 'royal-blue', label: 'Royal Blue', swatch: '#3B82F6' },
+    { id: 'ocean-blue', label: 'Ocean Blue', swatch: '#2563EB' },
+    { id: 'sapphire', label: 'Sapphire', swatch: '#1D4ED8' },
+    { id: 'sky-blue', label: 'Sky Blue', swatch: '#0EA5E9' },
+    { id: 'emerald-green', label: 'Emerald', swatch: '#10B981' },
+    { id: 'violet', label: 'Violet', swatch: '#7C3AED' },
+  ];
+
+  const [accentSaving, setAccentSaving] = useState<boolean>(false);
+
+  const handleAccentChange = async (color: AccentColor): Promise<void> => {
+    setAccentColor(color);
+    if (!token) return;
+    setAccentSaving(true);
+    try {
+      const result = await updatePreferences(token, { accent_color: color });
+      if (user) {
+        updateUser({ ...user, accent_color: result.accent_color });
+      }
+    } catch {
+      // Silently fail — local change is already applied
+    } finally {
+      setAccentSaving(false);
+    }
   };
 
   const validatePasswordForm = (): boolean => {
@@ -357,6 +385,31 @@ function SettingsPage() {
               >
                 Dark
               </button>
+            </div>
+
+            <h3 className={styles.accentHeading}>Accent Color</h3>
+            <div className={styles.accentGrid} role="radiogroup" aria-label="Accent color">
+              {ACCENT_OPTIONS.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={accentColor === option.id}
+                  aria-label={option.label}
+                  className={[
+                    styles.accentOption,
+                    accentColor === option.id ? styles.accentOptionActive : '',
+                  ].join(' ').trim()}
+                  onClick={() => handleAccentChange(option.id)}
+                  disabled={accentSaving}
+                >
+                  <span
+                    className={styles.accentSwatch}
+                    style={{ backgroundColor: option.swatch }}
+                  />
+                  <span className={styles.accentLabel}>{option.label}</span>
+                </button>
+              ))}
             </div>
           </div>
         </section>

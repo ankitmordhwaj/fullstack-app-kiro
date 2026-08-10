@@ -216,6 +216,50 @@ def update_profile():
     return jsonify(user.to_dict()), 200
 
 
+@auth_bp.route("/preferences", methods=["PUT"])
+@jwt_required()
+def update_preferences():
+    """Update the authenticated user's display preferences (accent_color).
+
+    Returns:
+        200 + updated user dict on success.
+        400 + ``{ "error": "..." }`` on invalid accent color.
+        500 + ``{ "error": "..." }`` on database error.
+    """
+    VALID_ACCENT_COLORS = {
+        "royal-blue", "ocean-blue", "sapphire", "sky-blue",
+        "emerald-green", "violet",
+    }
+
+    user_id = get_jwt_identity()
+    user = User.query.get(int(user_id))
+
+    if user is None:
+        logger.warning("Preferences update attempted for non-existent user id=%s", user_id)
+        return jsonify({"error": "User not found."}), 404
+
+    data: dict = request.get_json(silent=True) or {}
+    accent_color: str = (data.get("accent_color") or "").strip().lower()
+
+    if not accent_color:
+        return jsonify({"error": "accent_color is required."}), 400
+
+    if accent_color not in VALID_ACCENT_COLORS:
+        return jsonify({"error": f"Invalid accent color. Must be one of: {', '.join(sorted(VALID_ACCENT_COLORS))}"}), 400
+
+    user.accent_color = accent_color
+
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        logger.exception("Database error while updating preferences for user id=%s", user_id)
+        return jsonify({"error": "An unexpected error occurred."}), 500
+
+    logger.info("Preferences updated for user id=%s: accent_color=%s", user_id, accent_color)
+    return jsonify(user.to_dict()), 200
+
+
 @auth_bp.route("/password", methods=["PUT"])
 @jwt_required()
 def change_password():

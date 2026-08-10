@@ -3,6 +3,7 @@ export interface User {
   id: number;
   full_name: string;
   email: string;
+  accent_color: AccentColor;
   created_at: string;
 }
 
@@ -24,10 +25,13 @@ export interface Task {
 
 // Theme types
 export type Theme = 'light' | 'dark';
+export type AccentColor = 'royal-blue' | 'ocean-blue' | 'sapphire' | 'sky-blue' | 'emerald-green' | 'violet';
 
 export interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  accentColor: AccentColor;
+  setAccentColor: (color: AccentColor) => void;
 }
 
 // Profile update types
@@ -92,4 +96,42 @@ export class NetworkError extends Error {
     super(message);
     this.name = 'NetworkError';
   }
+}
+
+// Team notification types
+export type InvitationStatus = 'pending' | 'accepted' | 'declined';
+
+export interface TeamMember {
+  id: number;
+  full_name: string;
+  email: string;
+  role: 'owner' | 'member';
+  joined_at: string;
+}
+
+export interface PendingInvitation {
+  id: number;
+  email: string;
+  status: InvitationStatus;
+  created_at: string;
+}
+
+export interface TeamMembersResponse {
+  members: TeamMember[];
+  pending_invitations: PendingInvitation[];
+}
+
+export interface Notification {
+  id: number;
+  type: string;
+  message: string;
+  inviter_name: string;
+  invitation_id: number;
+  invitation_status: InvitationStatus;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface UnreadCountResponse {
+  count: number;
 }

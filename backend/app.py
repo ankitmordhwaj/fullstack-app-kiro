@@ -1,6 +1,7 @@
 import logging
 
 from flask import Flask, jsonify
+from werkzeug.exceptions import HTTPException
 
 from extensions import db, jwt, cors
 
@@ -57,19 +58,32 @@ def create_app(config=None) -> Flask:
     from routes.auth import auth_bp
     from routes.tasks import tasks_bp
     from routes.health import health_bp
+    from routes.teams import teams_bp
+    from routes.notifications import notifications_bp
+    from routes.invitations import invitations_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(tasks_bp)
     app.register_blueprint(health_bp)
+    app.register_blueprint(teams_bp)
+    app.register_blueprint(notifications_bp)
+    app.register_blueprint(invitations_bp)
 
     # ------------------------------------------------------------------ #
-    # Global error handler — sanitised 500, full traceback logged only
+    # Global error handlers
     # ------------------------------------------------------------------ #
+    @app.errorhandler(HTTPException)
+    def handle_http_exception(exc: HTTPException):
+        """Return proper JSON responses for HTTP errors (404, 405, etc.)."""
+        logger.debug("HTTP %s: %s", exc.code, exc.description)
+        return jsonify({"message": exc.description}), exc.code
+
     @app.errorhandler(Exception)
     def handle_unhandled_exception(exc: Exception):
+        """Catch-all for unexpected non-HTTP exceptions — return 500."""
         logger.exception("Unhandled exception: %s", exc)
         return (
-            jsonify({"error": "An unexpected error occurred. Please try again later."}),
+            jsonify({"message": "An unexpected error occurred. Please try again later."}),
             500,
         )
 

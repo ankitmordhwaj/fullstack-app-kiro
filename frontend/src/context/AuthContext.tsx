@@ -24,6 +24,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);
     localStorage.setItem('user', JSON.stringify(loggedInUser));
+    // Sync accent color preference from user profile
+    if (loggedInUser.accent_color) {
+      localStorage.setItem('accentColor', loggedInUser.accent_color);
+    }
     setToken(accessToken);
     setUser(loggedInUser);
   };

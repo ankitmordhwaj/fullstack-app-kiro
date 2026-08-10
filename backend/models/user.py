@@ -26,6 +26,7 @@ class User(db.Model):
     full_name = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(254), unique=True, nullable=False, index=True)
     password = db.Column(db.String(512), nullable=False)  # pbkdf2:sha256 hash
+    accent_color = db.Column(db.String(20), nullable=False, default="royal-blue")
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     tasks = db.relationship(
@@ -49,5 +50,6 @@ class User(db.Model):
             "id": self.id,
             "full_name": self.full_name,
             "email": self.email,
+            "accent_color": self.accent_color,
             "created_at": self.created_at.isoformat(),
         }

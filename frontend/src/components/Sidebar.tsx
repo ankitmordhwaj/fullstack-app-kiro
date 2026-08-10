@@ -131,7 +131,8 @@ function Sidebar({ collapsed, mobileOpen, onCloseMobile }: SidebarProps) {
             height="24"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#00BCD4"
+            stroke="currentColor"
+            style={{ color: 'var(--color-primary)' }}
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"

@@ -8,10 +8,8 @@ import TasksPage from './pages/TasksPage';
 import CreateTaskPage from './pages/CreateTaskPage';
 import EditTaskPage from './pages/EditTaskPage';
 import SettingsPage from './pages/SettingsPage';
-
-function ComingSoon({ title }: Readonly<{ title: string }>) {
-  return <h1>{title} — Coming Soon</h1>;
-}
+import TeamPage from './pages/TeamPage';
+import NotificationsPage from './pages/NotificationsPage';
 
 function App() {
   return (
@@ -28,7 +26,8 @@ function App() {
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/tasks/new" element={<CreateTaskPage />} />
             <Route path="/tasks/:id/edit" element={<EditTaskPage />} />
-            <Route path="/team" element={<ComingSoon title="Team Members" />} />
+            <Route path="/team" element={<TeamPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
 
