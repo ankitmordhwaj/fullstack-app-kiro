@@ -55,6 +55,7 @@ The style is clean, spacious, and uses soft shadows with rounded corners through
 
 ### Font Family
 - Primary: Inter, system-ui, sans-serif
+- Kanban components: DM Sans, Inter, system-ui, sans-serif (matches Figma reference)
 - Monospace: JetBrains Mono, monospace
 
 ### Font Sizes
@@ -207,6 +208,82 @@ Card Footer:
 
 ---
 
+### Kanban Board
+
+Reference Figma: https://www.figma.com/design/z8ZQQmYvdqQkihJSCWzmFI/Kanban-Board-%E2%80%93-Task-Management--Community-?node-id=0-1
+
+Layout:
+- Display: flex, gap 20px, overflow-x auto
+- Full width of content area, horizontal scroll on small screens
+- Padding: 24px 0
+- Min-height: calc(100vh - 140px) (fill available vertical space)
+
+Column:
+- Flex: 1, min-width 280px, max-width 380px
+- Background: #FDFDFD (near-white, from Figma)
+- Border: 1px solid #F4F4F4
+- Border-radius: 12px
+- Overflow: clip (rounded corners clip children)
+- Display: flex, flex-direction column, gap 16px, align-items center
+- Padding-bottom: 24px
+- Box-shadow: 24px 24px 80px rgba(0,0,0,0.01)
+- Overflow-y: auto, max-height: calc(100vh - 200px)
+
+Column Header:
+- Background: #FFFFFF
+- Border-bottom: 1px solid #F4F4F4
+- Padding: 12px 24px
+- Width: 100%
+- Text: font-size 16px, font-weight 400, color #313131, text-transform uppercase, text-align center, font-family DM Sans
+
+Column Colors (left accent bar on cards within column):
+- To Do (PENDING): left accent bar color #3B82F6 (blue)
+- In Progress (INPROGRESS): left accent bar color #F59E0B (amber)
+- Done (COMPLETED): left accent bar color #10B981 (green)
+
+### Kanban Task Card (based on Figma Card component)
+
+Layout:
+- Background: #FFFFFF
+- Border: 1px solid #E3E3E3
+- Border-radius: 12px
+- Padding: 16px
+- Width: 264px
+- Display: flex, flex-direction column, gap 12px
+- Box-shadow: multi-layer subtle (0 0 0 rgba(0,0,0,0.01), 2px 2px 6px rgba(0,0,0,0.01), 7px 9px 11px rgba(0,0,0,0.01))
+- Position: relative (for the left accent bar)
+- Cursor: grab (while dragging: cursor grabbing)
+- Transition: box-shadow 0.2s ease, transform 0.2s ease
+
+Left Accent Bar (priority/status indicator):
+- Position: absolute, left -2px, top 45px
+- Width: 3px, height 50px
+- Border-radius: 9999px (pill)
+- Color varies by column (see Column Colors above)
+
+Card Content:
+- Title row: display flex, justify-content space-between, align-items start
+  - Title: font-size 16px, font-weight 500, color #313131, font-family DM Sans, line-height 22px
+  - Priority icon: 22px, right-aligned in title row
+- Description: font-size 12px, font-weight 400, color #828282, line-height 16px, max 2 lines with text-overflow ellipsis
+
+Priority Badge Colors (pill style, font-size 10px, font-weight 500, border-radius 4px, padding 4px 8px):
+- HIGH: background #FFECE1, color #FF5C00
+- MEDIUM: background #E1F6FF, color #2C62B4
+- LOW: background #CDF4DD, color #188544
+
+Drag States:
+- Dragging: box-shadow 0 8px 24px rgba(0,0,0,0.12), transform scale(1.02), opacity 0.9
+- Drop target (column): background #E0F7FA, border 2px dashed #00BCD4
+- Hover (not dragging): box-shadow 0 4px 12px rgba(0,0,0,0.06)
+
+Card Actions (visible on hover):
+- Position: absolute, top-right corner
+- Small icon buttons (edit, delete), 24px, ghost style
+- Opacity 0 by default, opacity 1 on card hover
+
+---
+
 ### Icon Badge (Colored Circle)
 
 Styles:
@@ -352,6 +429,14 @@ Styles:
 - Gap: 20px
 - Page background: #F0F4F8
 
+### Kanban Board Layout
+- Display: flex, flex-direction row
+- Gap: 20px
+- Overflow-x: auto (horizontal scroll on narrow viewports)
+- Padding: 0 24px 24px
+- Each column is flex: 1, min-width 280px
+- On small screens (< 768px): columns stack vertically or scroll horizontally
+
 ### General Rules
 - Use 8px spacing grid
 - Max container width: 1200px (for content within main area)
@@ -398,10 +483,18 @@ Styles:
 | Cards (hover) | transform, box-shadow | 0.2s | ease |
 | Nav items     | background | 0.15s   | ease       |
 | Progress bar  | width      | 0.3s    | ease       |
+| Kanban card (drag start) | transform, box-shadow | 0.15s | ease-out |
+| Kanban card (drop)       | transform, opacity    | 0.2s  | ease     |
+| Column (drop highlight)  | background, border    | 0.15s | ease     |
 
 ### Card Hover Effect
 - transform: translateY(-2px)
 - box-shadow: 0 8px 24px rgba(0,0,0,0.08)
+
+### Kanban Drag Effect
+- On grab: transform scale(1.02), box-shadow lg, opacity 0.9
+- On drop: animate card into new position with 0.2s ease transition
+- Column highlight on drag-over: background fades to #E0F7FA
 
 ---
 

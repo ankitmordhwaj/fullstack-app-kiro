@@ -28,6 +28,31 @@ export async function getTeamMembers(token: string): Promise<TeamMembersResponse
   return response.json();
 }
 
+export async function removeMember(token: string, userId: number): Promise<{ message: string }> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}/teams/members/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+  } catch (err) {
+    if (err instanceof TypeError) {
+      throw new NetworkError();
+    }
+    throw err;
+  }
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw error;
+  }
+
+  return response.json();
+}
+
 export async function sendInvite(token: string, email: string): Promise<{ id: number; email: string; status: string; created_at: string }> {
   let response: Response;
   try {

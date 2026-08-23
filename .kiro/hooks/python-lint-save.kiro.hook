@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Python Lint on Save",
+  "description": "Runs flake8 linter on backend Python files whenever they are saved, catching syntax errors and style issues immediately.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "backend/**/*.py"
+    ]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "cd backend && python -m flake8 --max-line-length=120 --ignore=E402 --exclude=__pycache__,*.pyc,.venv"
+  }
+}

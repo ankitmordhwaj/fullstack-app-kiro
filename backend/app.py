@@ -8,6 +8,54 @@ from extensions import db, jwt, cors
 logger = logging.getLogger(__name__)
 
 
+def _sync_pg_enums(app: Flask) -> None:
+    """Ensure PostgreSQL enum types contain all values defined in Python enums.
+
+    This handles the case where a new enum member (e.g. CANCELLED) is added to
+    the Python code after the database type was originally created. Only runs
+    for PostgreSQL connections; silently skips for SQLite (used in tests).
+    """
+    uri = app.config.get("SQLALCHEMY_DATABASE_URI", "")
+    if not uri or "postgresql" not in uri:
+        return
+
+    from models.invitation import InvitationStatus
+
+    enum_sync_map = {
+        "invitationstatus": [member.name for member in InvitationStatus],
+    }
+
+    try:
+        with db.engine.connect() as conn:
+            for type_name, expected_values in enum_sync_map.items():
+                result = conn.execute(
+                    db.text(
+                        "SELECT enumlabel FROM pg_enum "
+                        "JOIN pg_type ON pg_enum.enumtypid = pg_type.oid "
+                        "WHERE pg_type.typname = :type_name"
+                    ),
+                    {"type_name": type_name},
+                )
+                existing = {row[0] for row in result}
+
+                for value in expected_values:
+                    if value not in existing:
+                        conn.execute(
+                            db.text(
+                                f"ALTER TYPE {type_name} ADD VALUE IF NOT EXISTS :val"
+                            ),
+                            {"val": value},
+                        )
+                        conn.commit()
+                        logger.info(
+                            "Added missing value '%s' to PostgreSQL enum type '%s'.",
+                            value,
+                            type_name,
+                        )
+    except Exception:
+        logger.warning("Could not sync PostgreSQL enum types.", exc_info=True)
+
+
 def create_app(config=None) -> Flask:
     """Application factory.
 
@@ -61,6 +109,7 @@ def create_app(config=None) -> Flask:
     from routes.teams import teams_bp
     from routes.notifications import notifications_bp
     from routes.invitations import invitations_bp
+    from routes.tickets import tickets_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(tasks_bp)
@@ -68,6 +117,7 @@ def create_app(config=None) -> Flask:
     app.register_blueprint(teams_bp)
     app.register_blueprint(notifications_bp)
     app.register_blueprint(invitations_bp)
+    app.register_blueprint(tickets_bp)
 
     # ------------------------------------------------------------------ #
     # Global error handlers
@@ -92,6 +142,12 @@ def create_app(config=None) -> Flask:
     # ------------------------------------------------------------------ #
     with app.app_context():
         db.create_all()
+
+        # Sync PostgreSQL enum types with Python enums.
+        # db.create_all() does not add new values to existing enum types,
+        # so we must do it manually to avoid StatementError on updates.
+        _sync_pg_enums(app)
+
         logger.info("Database tables ensured.")
 
     logger.info(

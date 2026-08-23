@@ -22,6 +22,7 @@ class InvitationStatus(enum.Enum):
     PENDING = "pending"
     ACCEPTED = "accepted"
     DECLINED = "declined"
+    CANCELLED = "cancelled"
 
 
 class Invitation(db.Model):

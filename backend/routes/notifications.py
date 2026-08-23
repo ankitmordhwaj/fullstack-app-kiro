@@ -5,10 +5,7 @@ import logging
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from extensions import db
 from models.notification import Notification
-from models.invitation import Invitation
-from models.user import User
 
 logger = logging.getLogger(__name__)
 

@@ -1,0 +1,48 @@
+.column {
+  flex: 1;
+  min-width: 280px;
+  max-width: 380px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: clip;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  padding-bottom: 24px;
+  box-shadow: 24px 24px 80px rgba(0, 0, 0, 0.01);
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+  transition: background 0.15s ease, border 0.15s ease;
+}
+
+.dropTarget {
+  background: var(--color-primary-light);
+  border: 2px dashed var(--color-primary);
+}
+
+.columnHeader {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 12px 24px;
+  width: 100%;
+  text-align: center;
+}
+
+.headerTitle {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--color-text-main);
+  text-transform: uppercase;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.cardList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  width: 100%;
+  padding: 0 8px;
+}

@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Quality Gate - Run Tests",
+  "description": "Runs backend pytest and frontend vitest after a spec task completes to ensure no regressions were introduced.",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "cd backend && python -m pytest tests/ -x -q 2>&1; cd ../frontend && npx vitest --run 2>&1"
+  }
+}

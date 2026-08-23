@@ -1,4 +1,4 @@
-"""Team routes: GET /teams/members and POST /teams/invite."""
+"""Team routes: GET /teams/members, POST /teams/invite, and DELETE /teams/members/<user_id>."""
 
 import logging
 import re
@@ -207,3 +207,74 @@ def invite_member():
         "status": invitation.status.value,
         "created_at": invitation.created_at.isoformat(),
     }), 201
+
+
+@teams_bp.route("/members/<int:user_id>", methods=["DELETE"])
+@jwt_required()
+def remove_member(user_id):
+    """Remove a member from the current user's team.
+
+    Only the team owner can remove members. The owner cannot remove themselves.
+
+    Returns:
+        200 + { "message": "Member removed successfully." }
+        400 + { "error": "..." } if attempting to remove the owner.
+        403 + { "error": "..." } if the current user is not the team owner.
+        404 + { "error": "..." } if the target user is not a member.
+        500 + { "error": "..." } on database error.
+    """
+    current_user_id = int(get_jwt_identity())
+
+    # Look up the team where the current user is owner
+    team = Team.query.filter_by(owner_id=current_user_id).first()
+
+    # Validate: current user must be a team owner
+    if team is None:
+        logger.warning(
+            "DELETE /teams/members/%s — user id=%s is not a team owner",
+            user_id, current_user_id,
+        )
+        return jsonify({"error": "Only the team owner can remove members."}), 403
+
+    # Validate: cannot remove the owner themselves
+    if user_id == current_user_id:
+        logger.info(
+            "DELETE /teams/members/%s — owner attempted self-removal, team id=%s",
+            user_id, team.id,
+        )
+        return jsonify({"error": "Cannot remove the team owner."}), 400
+
+    # Validate: target user must be a member of the team
+    membership = TeamMember.query.filter_by(team_id=team.id, user_id=user_id).first()
+    if membership is None:
+        logger.info(
+            "DELETE /teams/members/%s — not a member of team id=%s",
+            user_id, team.id,
+        )
+        return jsonify({"error": "Member not found in this team."}), 404
+
+    try:
+        db.session.delete(membership)
+
+        # Create a notification for the removed user
+        notification = Notification(
+            user_id=user_id,
+            type="team_removal",
+            message=f"You have been removed from {team.name}.",
+        )
+        db.session.add(notification)
+
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        logger.exception(
+            "DELETE /teams/members/%s — database error, team id=%s",
+            user_id, team.id,
+        )
+        return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
+
+    logger.info(
+        "DELETE /teams/members/%s — member removed from team id=%s",
+        user_id, team.id,
+    )
+    return jsonify({"message": "Member removed successfully."}), 200

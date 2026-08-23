@@ -135,3 +135,42 @@ export interface Notification {
 export interface UnreadCountResponse {
   count: number;
 }
+
+// Kanban Board Ticket types
+export type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH';
+export type TicketStatus = 'PENDING' | 'INPROGRESS' | 'COMPLETED';
+export type ColumnId = TicketStatus;
+
+export interface Ticket {
+  id: number;
+  title: string;
+  description: string;
+  priority: TicketPriority;
+  status: TicketStatus;
+  team_id: number;
+  creator_id: number;
+  assignee_id: number | null;
+  assignee_name: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TicketPayload {
+  title: string;
+  description: string;
+  priority: TicketPriority;
+  status?: TicketStatus;
+  assignee_id?: number | null;
+}
+
+export interface KanbanColumnDef {
+  id: ColumnId;
+  title: string;  // "To Do", "In Progress", "Done"
+  tickets: Ticket[];
+}
+
+export interface TeamMemberInfo {
+  id: number;
+  full_name: string;
+  email: string;
+}

@@ -12,6 +12,8 @@ from flask_jwt_extended import (
 )
 
 from extensions import db
+from models.invitation import Invitation, InvitationStatus
+from models.notification import Notification
 from models.user import User
 
 logger = logging.getLogger(__name__)
@@ -88,6 +90,25 @@ def register():
 
     try:
         db.session.add(user)
+        db.session.flush()  # Assign user.id without committing
+
+        # Auto-link pending invitations for this email
+        pending_invitations = Invitation.query.filter(
+            db.func.lower(Invitation.invitee_email) == email_lower,
+            Invitation.status == InvitationStatus.PENDING,
+        ).all()
+
+        for invitation in pending_invitations:
+            invitation.invitee_id = user.id
+            inviter = User.query.get(invitation.inviter_id)
+            notification = Notification(
+                user_id=user.id,
+                type="team_invitation",
+                message=f"{inviter.full_name} invited you to join their team.",
+                invitation_id=invitation.id,
+            )
+            db.session.add(notification)
+
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -245,7 +266,8 @@ def update_preferences():
         return jsonify({"error": "accent_color is required."}), 400
 
     if accent_color not in VALID_ACCENT_COLORS:
-        return jsonify({"error": f"Invalid accent color. Must be one of: {', '.join(sorted(VALID_ACCENT_COLORS))}"}), 400
+        valid_colors = ', '.join(sorted(VALID_ACCENT_COLORS))
+        return jsonify({"error": f"Invalid accent color. Must be one of: {valid_colors}"}), 400
 
     user.accent_color = accent_color
 

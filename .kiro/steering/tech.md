@@ -95,16 +95,27 @@ export interface User {
 }
 
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH';
-export type Status = 'PENDING' | 'INPROGRESS' | 'COMPLETED';
+export type TaskStatus = 'PENDING' | 'INPROGRESS' | 'COMPLETED';
+
+// Kanban column identifiers map directly to TaskStatus
+export type ColumnId = TaskStatus;
 
 export interface Task {
   id: number;
   title: string;
   description: string;
   priority: Priority;
-  status: Status;
+  status: TaskStatus;
   created_at: string;
+  updated_at: string;
   user_id: number;
+}
+
+// Kanban board column definition
+export interface KanbanColumn {
+  id: ColumnId;
+  title: string;  // Display name: "To Do", "In Progress", "Done"
+  tasks: Task[];
 }
 
 export interface AuthContextType {
@@ -118,11 +129,13 @@ export interface AuthContextType {
 ### Key Conventions
 - All API calls centralised in `frontend/src/api/` folder
 - Components in `frontend/src/components/`
+- Kanban board components in `frontend/src/components/board/` (KanbanBoard, KanbanColumn, KanbanCard)
 - Pages in `frontend/src/pages/`
 - Auth context via React Context API in `frontend/src/context/AuthContext.tsx`
 - Shared types in `frontend/src/types/index.ts`
 - JWT token stored in `localStorage`
 - Protected routes redirect unauthenticated users to `/login`
+- Use the HTML5 Drag and Drop API for kanban card movement — no external DnD library required
 
 ### Testing
 - Use **Vitest** (built into Vite) as the test runner

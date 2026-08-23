@@ -1,4 +1,4 @@
-"""Invitation routes: PUT /invitations/<id>/accept, PUT /invitations/<id>/decline."""
+"""Invitation routes: PUT /invitations/<id>/accept, PUT /invitations/<id>/decline, PUT /invitations/<id>/cancel."""
 
 import logging
 
@@ -142,4 +142,65 @@ def decline_invitation(invitation_id):
     except Exception:
         db.session.rollback()
         logger.exception("Database error while declining invitation id=%s.", invitation_id)
+        return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
+
+
+@invitations_bp.route("/<int:invitation_id>/cancel", methods=["PUT"])
+@jwt_required()
+def cancel_invitation(invitation_id):
+    """Cancel a pending team invitation (by the inviter).
+
+    Validates that the current user is the inviter, that the invitation is
+    still pending, then updates the status to cancelled and marks the related
+    notification as read.
+
+    Returns:
+        200 + ``{ "id", "status" }`` on success.
+        403 if current user is not the inviter.
+        404 if invitation not found.
+        400 if invitation is not pending.
+        500 on database error.
+    """
+    current_user_id = int(get_jwt_identity())
+
+    invitation = Invitation.query.get(invitation_id)
+    if invitation is None:
+        logger.info("Cancel invitation failed: invitation id=%s not found.", invitation_id)
+        return jsonify({"error": "Invitation not found."}), 404
+
+    if invitation.inviter_id != current_user_id:
+        logger.warning(
+            "Cancel invitation forbidden: user id=%s is not inviter for invitation id=%s.",
+            current_user_id,
+            invitation_id,
+        )
+        return jsonify({"error": "You are not the inviter for this invitation."}), 403
+
+    if invitation.status != InvitationStatus.PENDING:
+        logger.info(
+            "Cancel invitation rejected: invitation id=%s status is %s.",
+            invitation_id,
+            invitation.status.value,
+        )
+        return jsonify({"error": "Only pending invitations can be cancelled."}), 400
+
+    try:
+        invitation.status = InvitationStatus.CANCELLED
+
+        # Mark related notification as read
+        notification = Notification.query.filter_by(invitation_id=invitation.id).first()
+        if notification:
+            notification.is_read = True
+
+        db.session.commit()
+        logger.info(
+            "Invitation id=%s cancelled by user id=%s.",
+            invitation_id,
+            current_user_id,
+        )
+        return jsonify({"id": invitation.id, "status": "cancelled"}), 200
+
+    except Exception:
+        db.session.rollback()
+        logger.exception("Database error while cancelling invitation id=%s.", invitation_id)
         return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500

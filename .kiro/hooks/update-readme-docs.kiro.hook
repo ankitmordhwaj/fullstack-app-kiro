@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "name": "Update README on Structure Change",
+  "description": "When a new route file is created or the project structure changes significantly (new routes, models, or config), the agent reviews and updates the README to keep documentation in sync.",
+  "version": "1",
+  "when": {
+    "type": "fileCreated",
+    "patterns": [
+      "backend/routes/*.py",
+      "backend/models/*.py",
+      "frontend/src/pages/*.tsx",
+      "docker-compose.yml"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A new file was created that may affect the project README. Review the README.md at the project root and update it if needed — check that API endpoints, project structure, and setup instructions are still accurate. Only make changes if the new file introduces something not already documented."
+  }
+}

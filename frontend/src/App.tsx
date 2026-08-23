@@ -10,6 +10,7 @@ import EditTaskPage from './pages/EditTaskPage';
 import SettingsPage from './pages/SettingsPage';
 import TeamPage from './pages/TeamPage';
 import NotificationsPage from './pages/NotificationsPage';
+import BoardPage from './pages/BoardPage';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/tasks/:id/edit" element={<EditTaskPage />} />
             <Route path="/team" element={<TeamPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/board" element={<BoardPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
 

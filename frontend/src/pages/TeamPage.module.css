@@ -118,6 +118,9 @@
 }
 
 .errorBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   background: #FEE2E2;
   color: #B91C1C;
   padding: 12px 16px;
@@ -140,4 +143,78 @@
   font-size: 14px;
   color: #059669;
   margin-top: 8px;
+}
+
+.memberActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.removeButton {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #FFFFFF;
+  background: #EF4444;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.removeButton:hover {
+  background: #DC2626;
+}
+
+.removeButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.removeButton:focus {
+  outline: 2px solid #EF4444;
+  outline-offset: 2px;
+}
+
+.dismissButton {
+  background: none;
+  border: none;
+  font-size: 18px;
+  font-weight: 700;
+  color: #B91C1C;
+  cursor: pointer;
+  margin-left: 12px;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.dismissButton:hover {
+  color: #7F1D1D;
+}
+
+.cancelButton {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #FFFFFF;
+  background: #D97706;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  background: #B45309;
+}
+
+.cancelButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancelButton:focus {
+  outline: 2px solid #D97706;
+  outline-offset: 2px;
 }
